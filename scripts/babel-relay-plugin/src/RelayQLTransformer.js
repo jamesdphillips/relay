@@ -16,6 +16,7 @@ const {
   RelayQLDefinition,
   RelayQLFragment,
   RelayQLMutation,
+  RelayQLSubscription,
   RelayQLQuery,
 } = require('./RelayQLAST');
 const RelayQLPrinter = require('./RelayQLPrinter');
@@ -112,11 +113,11 @@ class RelayQLTransformer {
     documentName: string
   ): string {
     const matches =
-      /^(fragment|mutation|query)\s*(\w*)?([\s\S]*)/.exec(templateText);
+      /^(fragment|mutation|subscription|query)\s*(\w*)?([\s\S]*)/.exec(templateText);
     invariant(
       matches,
       'You supplied a GraphQL document named `%s` with invalid syntax. It ' +
-      'must start with `fragment`, `mutation`, or `query`.',
+      'must start with `fragment`, `mutation`, `subscription`, or `query`.',
       documentName
     );
     const type = matches[1];
@@ -160,6 +161,8 @@ class RelayQLTransformer {
     } else if (definition.kind === 'OperationDefinition') {
       if (definition.operation === 'mutation') {
         return new RelayQLMutation(context, definition);
+      } else if (definition.operation === 'subscription') {
+        return new RelayQLSubscription(context, definition);
       } else if (definition.operation === 'query') {
         return new RelayQLQuery(context, definition);
       } else {
@@ -182,6 +185,9 @@ class RelayQLTransformer {
     const isMutation =
       definition.kind === 'OperationDefinition' &&
       definition.operation === 'mutation';
+    const isSubscription =
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription';
 
     const rules = [
       require(
@@ -212,7 +218,7 @@ class RelayQLTransformer {
         'graphql/validation/rules/VariablesInAllowedPosition'
       ).VariablesInAllowedPosition,
     ];
-    if (!isMutation) {
+    if (!isMutation && !isSubscription) {
       rules.push(
         require(
           'graphql/validation/rules/ProvidedNonNullArguments'

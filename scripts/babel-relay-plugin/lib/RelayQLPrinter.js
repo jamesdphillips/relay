@@ -34,6 +34,7 @@ var RelayQLFragment = _require.RelayQLFragment;
 var RelayQLFragmentSpread = _require.RelayQLFragmentSpread;
 var RelayQLInlineFragment = _require.RelayQLInlineFragment;
 var RelayQLMutation = _require.RelayQLMutation;
+var RelayQLSubscription = _require.RelayQLSubscription;
 var RelayQLQuery = _require.RelayQLQuery;
 var RelayQLType = _require.RelayQLType;
 
@@ -60,6 +61,8 @@ var RelayQLPrinter = (function () {
         printedDocument = this.printFragment(definition);
       } else if (definition instanceof RelayQLMutation) {
         printedDocument = this.printMutation(definition);
+      } else if (definition instanceof RelayQLSubscription) {
+        printedDocument = this.printSubscription(definition);
       } else {
         invariant(false, 'Unsupported definition: %s', definition);
       }
@@ -128,6 +131,22 @@ var RelayQLPrinter = (function () {
       var metadata = this.printRelayDirectiveMetadata(fragment);
 
       return t.newExpression(t.memberExpression(t.identifier('GraphQL'), t.identifier('QueryFragment')), trimArguments([t.literal(fragment.getName()), t.literal(fragmentType.getName({ modifiers: true })), selection.fields, selection.fragments, objectify(metadata), this.printDirectives(fragment.getDirectives())]));
+    }
+  }, {
+    key: 'printSubscription',
+    value: function printSubscription(subscription) {
+      var rootFields = subscription.getFields();
+      invariant(rootFields.length === 1, 'There are %d fields supplied to the subscription named `%s`, but ' + 'subscriptions must have exactly one field.', rootFields.length, subscription.getName());
+      var rootField = rootFields[0];
+      var rootFieldType = rootField.getType();
+      validateSubscriptionField(rootField);
+      var requisiteFields = { clientSubscriptionId: true };
+      var selection = this.printSelection(rootField, requisiteFields);
+      var metadata = {
+        inputType: this.printArgumentTypeForMetadata(rootField.getDeclaredArgument('input'))
+      };
+
+      return t.newExpression(t.memberExpression(t.identifier('GraphQL'), t.identifier('Subscription')), trimArguments([t.literal(subscription.getName()), t.literal(rootFieldType.getName({ modifiers: true })), t.newExpression(t.memberExpression(t.identifier('GraphQL'), t.identifier('Callv')), trimArguments([t.literal(rootField.getName()), this.printVariable('input')])), selection.fields, selection.fragments, objectify(metadata)]));
     }
   }, {
     key: 'printMutation',
@@ -372,6 +391,16 @@ function validateConnectionField(field) {
     var isNodesLikeField = subfield.getName() !== 'edges' && subfieldType.isList() && subfieldType.getName({ modifiers: false }) === connectionNodeType.getName({ modifiers: false });
     invariant(!isNodesLikeField, 'You supplied a field named `%s` on a connection named `%s`, but ' + 'pagination is not supported on connections without using edges. Use ' + '`%s{edges{node{...}}}` instead.', subfield.getName(), field.getName(), field.getName());
   });
+}
+
+function validateSubscriptionField(rootField) {
+  var declaredArgs = rootField.getDeclaredArguments();
+  var declaredArgNames = Object.keys(declaredArgs);
+  invariant(declaredArgNames.length === 1, 'Your schema defines a subscription field `%s` that takes %d arguments, ' + 'but subscription fields must have exactly one argument named `input`.', rootField.getName(), declaredArgNames.length);
+  invariant(declaredArgNames[0] === 'input', 'Your schema defines a subscription field `%s` that takes an argument ' + 'named `%s`, but subscription fields must have exactly one argument ' + 'named `input`.', rootField.getName(), declaredArgNames[0]);
+
+  var rootFieldArgs = rootField.getArguments();
+  invariant(rootFieldArgs.length <= 1, 'There are %d arguments supplied to the subscription field named `%s`, ' + 'but subdscription fields must have exactly one `input` argument.', rootFieldArgs.length, rootField.getName());
 }
 
 function validateMutationField(rootField) {

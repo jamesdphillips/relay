@@ -22,6 +22,7 @@ var _require = require('./RelayQLAST');
 var RelayQLDefinition = _require.RelayQLDefinition;
 var RelayQLFragment = _require.RelayQLFragment;
 var RelayQLMutation = _require.RelayQLMutation;
+var RelayQLSubscription = _require.RelayQLSubscription;
 var RelayQLQuery = _require.RelayQLQuery;
 
 var RelayQLPrinter = require('./RelayQLPrinter');
@@ -85,8 +86,8 @@ var RelayQLTransformer = (function () {
   }, {
     key: 'processTemplateText',
     value: function processTemplateText(templateText, documentName) {
-      var matches = /^(fragment|mutation|query)\s*(\w*)?([\s\S]*)/.exec(templateText);
-      invariant(matches, 'You supplied a GraphQL document named `%s` with invalid syntax. It ' + 'must start with `fragment`, `mutation`, or `query`.', documentName);
+      var matches = /^(fragment|mutation|subscription|query)\s*(\w*)?([\s\S]*)/.exec(templateText);
+      invariant(matches, 'You supplied a GraphQL document named `%s` with invalid syntax. It ' + 'must start with `fragment`, `mutation`, `subscription`, or `query`.', documentName);
       var type = matches[1];
       var name = matches[2] || documentName;
       var rest = matches[3];
@@ -124,6 +125,8 @@ var RelayQLTransformer = (function () {
       } else if (definition.kind === 'OperationDefinition') {
         if (definition.operation === 'mutation') {
           return new RelayQLMutation(context, definition);
+        } else if (definition.operation === 'subscription') {
+          return new RelayQLSubscription(context, definition);
         } else if (definition.operation === 'query') {
           return new RelayQLQuery(context, definition);
         } else {
@@ -140,9 +143,10 @@ var RelayQLTransformer = (function () {
       invariant(document.definitions.length === 1, 'You supplied a GraphQL document named `%s` with %d definitions, but ' + 'it must have exactly one definition.', document.definitions.length);
       var definition = document.definitions[0];
       var isMutation = definition.kind === 'OperationDefinition' && definition.operation === 'mutation';
+      var isSubscription = definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
 
       var rules = [require('graphql/validation/rules/ArgumentsOfCorrectType').ArgumentsOfCorrectType, require('graphql/validation/rules/DefaultValuesOfCorrectType').DefaultValuesOfCorrectType, require('graphql/validation/rules/FieldsOnCorrectType').FieldsOnCorrectType, require('graphql/validation/rules/FragmentsOnCompositeTypes').FragmentsOnCompositeTypes, require('graphql/validation/rules/KnownArgumentNames').KnownArgumentNames, require('graphql/validation/rules/KnownTypeNames').KnownTypeNames, require('graphql/validation/rules/PossibleFragmentSpreads').PossibleFragmentSpreads, require('graphql/validation/rules/PossibleFragmentSpreads').PossibleFragmentSpreads, require('graphql/validation/rules/VariablesInAllowedPosition').VariablesInAllowedPosition];
-      if (!isMutation) {
+      if (!isMutation && !isSubscription) {
         rules.push(require('graphql/validation/rules/ProvidedNonNullArguments').ProvidedNonNullArguments);
       }
       var validationErrors = validate(this.schema, document, rules);

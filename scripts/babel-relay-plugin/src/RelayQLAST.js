@@ -157,6 +157,12 @@ class RelayQLFragment extends RelayQLDefinition<
   }
 }
 
+class RelayQLSubscription extends RelayQLDefinition<GraphQLOperationDefinition> {
+  getType(): RelayQLType {
+    return new RelayQLType(this.context, this.context.schema.getSubscriptionType());
+  }
+}
+
 class RelayQLMutation extends RelayQLDefinition<GraphQLOperationDefinition> {
   getType(): RelayQLType {
     return new RelayQLType(this.context, this.context.schema.getMutationType());
@@ -655,6 +661,7 @@ module.exports = {
   RelayQLFragmentSpread,
   RelayQLInlineFragment,
   RelayQLMutation,
+  RelayQLSubscription,
   RelayQLNode,
   RelayQLQuery,
   RelayQLType,
