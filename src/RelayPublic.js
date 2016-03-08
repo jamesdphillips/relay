@@ -15,6 +15,7 @@
 
 var RelayContainer = require('RelayContainer');
 var RelayMutation = require('RelayMutation');
+var RelaySubscription = require('RelaySubscription');
 var RelayNetworkLayer = require('RelayNetworkLayer');
 var RelayPropTypes = require('RelayPropTypes');
 var RelayQL = require('RelayQL');
@@ -38,6 +39,7 @@ if (typeof global.__REACT_DEVTOOLS_GLOBAL_HOOK__ !== 'undefined') {
  */
 var RelayPublic = {
   Mutation: RelayMutation,
+  Subscription: RelaySubscription,
   PropTypes: RelayPropTypes,
   QL: RelayQL,
   Query: RelayQL,

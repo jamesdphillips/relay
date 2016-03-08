@@ -139,7 +139,6 @@ var RelayQLPrinter = (function () {
       invariant(rootFields.length === 1, 'There are %d fields supplied to the subscription named `%s`, but ' + 'subscriptions must have exactly one field.', rootFields.length, subscription.getName());
       var rootField = rootFields[0];
       var rootFieldType = rootField.getType();
-      validateSubscriptionField(rootField);
       var requisiteFields = { clientSubscriptionId: true };
       var selection = this.printSelection(rootField, requisiteFields);
       var metadata = {
@@ -391,16 +390,6 @@ function validateConnectionField(field) {
     var isNodesLikeField = subfield.getName() !== 'edges' && subfieldType.isList() && subfieldType.getName({ modifiers: false }) === connectionNodeType.getName({ modifiers: false });
     invariant(!isNodesLikeField, 'You supplied a field named `%s` on a connection named `%s`, but ' + 'pagination is not supported on connections without using edges. Use ' + '`%s{edges{node{...}}}` instead.', subfield.getName(), field.getName(), field.getName());
   });
-}
-
-function validateSubscriptionField(rootField) {
-  var declaredArgs = rootField.getDeclaredArguments();
-  var declaredArgNames = Object.keys(declaredArgs);
-  invariant(declaredArgNames.length === 1, 'Your schema defines a subscription field `%s` that takes %d arguments, ' + 'but subscription fields must have exactly one argument named `input`.', rootField.getName(), declaredArgNames.length);
-  invariant(declaredArgNames[0] === 'input', 'Your schema defines a subscription field `%s` that takes an argument ' + 'named `%s`, but subscription fields must have exactly one argument ' + 'named `input`.', rootField.getName(), declaredArgNames[0]);
-
-  var rootFieldArgs = rootField.getArguments();
-  invariant(rootFieldArgs.length <= 1, 'There are %d arguments supplied to the subscription field named `%s`, ' + 'but subdscription fields must have exactly one `input` argument.', rootFieldArgs.length, rootField.getName());
 }
 
 function validateMutationField(rootField) {

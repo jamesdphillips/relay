@@ -200,7 +200,6 @@ class RelayQLPrinter {
     );
     const rootField = rootFields[0];
     const rootFieldType = rootField.getType();
-    validateSubscriptionField(rootField);
     const requisiteFields = {clientSubscriptionId: true};
     const selection = this.printSelection(rootField, requisiteFields);
     const metadata = {
@@ -612,35 +611,6 @@ function validateConnectionField(field: RelayQLField): void {
       field.getName()
     );
   });
-}
-
-function validateSubscriptionField(rootField: RelayQLField): void {
-  const declaredArgs = rootField.getDeclaredArguments();
-  const declaredArgNames = Object.keys(declaredArgs);
-  invariant(
-    declaredArgNames.length === 1,
-    'Your schema defines a subscription field `%s` that takes %d arguments, ' +
-    'but subscription fields must have exactly one argument named `input`.',
-    rootField.getName(),
-    declaredArgNames.length
-  );
-  invariant(
-    declaredArgNames[0] === 'input',
-    'Your schema defines a subscription field `%s` that takes an argument ' +
-    'named `%s`, but subscription fields must have exactly one argument ' +
-    'named `input`.',
-    rootField.getName(),
-    declaredArgNames[0]
-  );
-
-  const rootFieldArgs = rootField.getArguments();
-  invariant(
-    rootFieldArgs.length <= 1,
-    'There are %d arguments supplied to the subscription field named `%s`, ' +
-    'but subdscription fields must have exactly one `input` argument.',
-    rootFieldArgs.length,
-    rootField.getName()
-  );
 }
 
 function validateMutationField(rootField: RelayQLField): void {

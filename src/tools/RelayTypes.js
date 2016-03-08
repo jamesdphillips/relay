@@ -86,6 +86,18 @@ export type RelayProp = {
   variables: Variables,
 };
 
+// Subscriptions
+export type RelaySubscriptionConnectCallbacks = {
+  onNext?: ?RelaySubscriptionConnectNextCallback;
+  onError?: ?RelaySubscriptionConnectErrorCallback;
+};
+export type RelaySubscriptionConnectNextCallback = (
+  data: {[key: string]: Object}
+) => void;
+export type RelaySubscriptionConnectErrorCallback = (
+  err: {[key: string]: Object}
+) => void;
+
 // Mutations
 export type RelayMutationTransactionCommitFailureCallback = (
   transaction: RelayMutationTransaction,

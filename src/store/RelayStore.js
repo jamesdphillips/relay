@@ -28,6 +28,7 @@ import type {
   Abortable,
   Observable,
   RelayMutationTransactionCommitCallbacks,
+  RelaySubscriptionConnectCallbacks,
   ReadyStateChangeCallback,
   StoreReaderData,
   StoreReaderOptions
@@ -166,6 +167,15 @@ var RelayStore = {
   ): void {
     var transaction = new RelayMutationTransaction(mutation);
     transaction.commit(callbacks);
+  },
+
+  subscribe(
+    subscription: RelaySubscription,
+    callbacks?: RelaySubscriptionConnectCallbacks
+  ): void {
+    var connection = new RelaySubscriptionConnection(subscription);
+    connection.connect(callbacks);
+    return connection;
   }
 };
 

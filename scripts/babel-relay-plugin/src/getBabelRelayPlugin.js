@@ -76,6 +76,7 @@ function getBabelRelayPlugin(
               documentName = captures[0];
             }
           }
+          warning('\n\n\n\n\nHELLL\n\n\n\n', documentName);
           state.opts.extra.documentName = documentName || 'UnknownFile';
         },
 
@@ -83,6 +84,7 @@ function getBabelRelayPlugin(
          * Transform Relay.QL`...`.
          */
         TaggedTemplateExpression(node, parent, scope, state) {
+          warning('\n\n\n\n\nWTFFFFFFF\n\n\n\n');
           const tag = this.get('tag');
           const tagName =
             tag.matchesPattern('Relay.QL') ? 'Relay.QL' :

@@ -15,6 +15,7 @@
 
 var Promise = require('Promise');
 import type RelayMutationRequest from 'RelayMutationRequest';
+import type RelaySubscriptionRequest from 'RelayMutationRequest';
 import type RelayQueryRequest from 'RelayQueryRequest';
 
 var fetch = require('fetch');
@@ -91,6 +92,10 @@ class RelayDefaultNetworkLayer {
         error => request.reject(error)
       )
     )));
+  }
+
+  startSubscription(...options: RelaySubscriptionRequest): void {
+    throw new Error('No callback set up for handling subscriptions.');
   }
 
   supports(...options: Array<string>): boolean {

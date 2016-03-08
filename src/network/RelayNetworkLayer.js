@@ -15,6 +15,7 @@
 
 var Promise = require('Promise');
 import type RelayMutationRequest from 'RelayMutationRequest';
+import type RelaySubscriptionRequest from 'RelaySubscriptionRequest';
 var RelayProfiler = require('RelayProfiler');
 import type RelayQueryRequest from 'RelayQueryRequest';
 
@@ -23,6 +24,7 @@ var invariant = require('invariant');
 type NetworkLayer = {
   sendMutation: (mutationRequest: RelayMutationRequest) => ?Promise;
   sendQueries: (queryRequests: Array<RelayQueryRequest>) => ?Promise;
+  startSubscription: (subscriptionRequest: Array<RelaySubscriptionRequest>) => void;
   supports: (...options: Array<string>) => boolean;
 };
 

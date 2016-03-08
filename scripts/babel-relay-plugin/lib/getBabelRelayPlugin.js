@@ -72,6 +72,7 @@ function getBabelRelayPlugin(schemaProvider, pluginOptions) {
               documentName = captures[0];
             }
           }
+          warning('\n\n\n\n\nHELLL\n\n\n\n', documentName);
           state.opts.extra.documentName = documentName || 'UnknownFile';
         },
 
@@ -79,6 +80,7 @@ function getBabelRelayPlugin(schemaProvider, pluginOptions) {
          * Transform Relay.QL`...`.
          */
         TaggedTemplateExpression: function TaggedTemplateExpression(node, parent, scope, state) {
+          warning('\n\n\n\n\nWTFFFFFFF\n\n\n\n');
           var tag = this.get('tag');
           var tagName = tag.matchesPattern('Relay.QL') ? 'Relay.QL' : tag.matchesPattern('Relay.Query') ? 'Relay.Query' : tag.isIdentifier({ name: 'RelayQL' }) ? 'RelayQL' : null;
           if (!tagName) {
